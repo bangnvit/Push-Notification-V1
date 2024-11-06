@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Push Notifications</string>
+
+    <string name="channel_name_channel_1">Channel 1</string>
+    <string name="channel_description_channel_1">This is Channel 1</string>
+    <string name="str_send_notification_channel_1">Send Notification Channel 1</string>
+    <string name="str_noti_title_channel_1">Push Notification Title Channel 1</string>
+    <string name="str_noti_message_channel_1">Push Notification Message Channel 1</string>
+
+    <string name="channel_name_channel_2">Channel 2</string>
+    <string name="channel_description_channel_2">This is Channel 2</string>
+    <string name="str_send_notification_channel_2">Send Notification Channel 2</string>
+    <string name="str_noti_title_channel_2">Push Notification Title Channel 2</string>
+    <string name="str_noti_message_channel_2">Push Notification Message Channel 2</string>
+
+    <string name="str_permission_denied">Permission for notifications denied</string>
+    <string name="str_permission_granted">Notification permission granted.</string>
+</resources>
