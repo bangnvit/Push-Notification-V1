@@ -2,6 +2,7 @@ package com.bangnv.pushnotifications.utils
 
 import android.app.Activity
 import android.util.Log
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 
 object GlobalFunction {
@@ -23,6 +24,8 @@ object GlobalFunction {
     fun showSoftKeyboard(activity: Activity) {
         val inputMethodManager =
             activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+        // Create a view if there is no focus view
+        val view = activity.currentFocus ?: View(activity)
+        inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     }
 }

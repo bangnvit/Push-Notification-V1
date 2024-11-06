@@ -11,8 +11,15 @@
     <string name="channel_description_channel_2">This is Channel 2</string>
     <string name="str_send_notification_channel_2">Send Notification Channel 2</string>
     <string name="str_noti_title_channel_2">Push Notification Title Channel 2</string>
-    <string name="str_noti_message_channel_2">Push Notification Message Channel 2</string>
+    <string name="str_noti_message_channel_2">Push Notification Message Channel 2:
+        Push notifications are messages sent from an app to notify users
+        of important events or updates, even when the app is not actively in use.
+        These notifications can appear on the lock screen or in the notification bar,
+        allowing users to quickly view the information. They can also be customized
+        with different channels, sounds, and priority levels to ensure users
+        are informed in a timely manner.</string>
 
     <string name="str_permission_denied">Permission for notifications denied</string>
-    <string name="str_permission_granted">Notification permission granted.</string>
+    <string name="str_permission_granted">Notification permission granted.
+        Tap again to send the notification.</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bangnv.pushnotifications.databinding.ActivityMainBinding
+import com.bangnv.pushnotifications.utils.showToastLong
 import com.bangnv.pushnotifications.utils.showToastShort
 import java.util.Date
 
@@ -37,7 +38,8 @@ class MainActivity : AppCompatActivity() {
             sendNotificationIfPermitted(
                 channelId = MyApplication.CHANNEL_ID_1,
                 title = getString(R.string.str_noti_title_channel_1),
-                message = getString(R.string.str_noti_message_channel_1)
+                message = getString(R.string.str_noti_message_channel_1),
+                styleType = "BigPicture"
             )
         }
 
@@ -45,14 +47,15 @@ class MainActivity : AppCompatActivity() {
             sendNotificationIfPermitted(
                 channelId = MyApplication.CHANNEL_ID_2,
                 title = getString(R.string.str_noti_title_channel_2),
-                message = getString(R.string.str_noti_message_channel_2)
+                message = getString(R.string.str_noti_message_channel_2),
+                styleType = "BigText"
             )
         }
     }
 
-    private fun sendNotificationIfPermitted(channelId: String, title: String, message: String) {
+    private fun sendNotificationIfPermitted(channelId: String, title: String, message: String, styleType: String) {
         if (hasNotificationPermission()) {
-            sendNotification(channelId, title, message)
+            sendNotification(channelId, title, message, styleType)
         } else {
             requestNotificationPermission()
         }
@@ -80,14 +83,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendNotification(channelId: String, title: String, message: String) {
+    private fun sendNotification(channelId: String, title: String, message: String, styleType: String) {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             val notificationManagerCompat = NotificationManagerCompat.from(this)
-            val notification = buildNotification(channelId, title, message).build()
+            val notification = buildNotification(channelId, title, message, styleType).build()
             notificationManagerCompat.notify(getNotificationId(), notification)
         }
     }
@@ -95,17 +98,28 @@ class MainActivity : AppCompatActivity() {
     private fun buildNotification(
         channelId: String,
         title: String,
-        message: String
+        message: String,
+        styleType: String
     ): NotificationCompat.Builder {
-        val bitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
-
-        return NotificationCompat.Builder(this, channelId)
+        val bitmapIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        val builder = NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
             .setContentText(message)
             .setSmallIcon(R.drawable.ic_notification)
-            .setLargeIcon(bitmap)
+            .setLargeIcon(bitmapIcon)
             .setColor(resources.getColor(R.color.colorAccent, theme))
+
+        // Apply style based on styleType
+        if (styleType == "BigText") {
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(message))
+        } else if (styleType == "BigPicture") {
+            val bigPicture = BitmapFactory.decodeResource(resources, R.drawable.img_push_notification) // Replace with your image
+            builder.setStyle(NotificationCompat.BigPictureStyle().bigPicture(bigPicture))
+        }
+
+        return builder
     }
+
 
     private fun getNotificationId() = Date().time.toInt()
 
@@ -117,7 +131,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_POST_NOTIFICATION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showToastShort(getString(R.string.str_permission_granted))
+                showToastLong(getString(R.string.str_permission_granted))
             } else {
                 showToastShort(getString(R.string.str_permission_denied))
             }
