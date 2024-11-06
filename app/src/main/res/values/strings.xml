@@ -5,7 +5,7 @@
     <string name="channel_description_channel_1">This is Channel 1</string>
     <string name="str_send_notification_channel_1">Send Notification Channel 1</string>
     <string name="str_noti_title_channel_1">Push Notification Title Channel 1</string>
-    <string name="str_noti_message_channel_1">Push Notification Message Channel 1</string>
+    <string name="str_noti_message_channel_1">Push Notification Message Channel 1 with big picture.</string>
 
     <string name="channel_name_channel_2">Channel 2</string>
     <string name="channel_description_channel_2">This is Channel 2</string>

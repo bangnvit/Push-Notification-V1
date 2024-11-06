@@ -3,6 +3,8 @@ package com.bangnv.pushnotifications
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +20,8 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_CODE_POST_NOTIFICATION = 1001
+        private const val TYPE_NOTIFICATION_1 = "TYPE_NOTIFICATION_1"
+        private const val TYPE_NOTIFICATION_2 = "TYPE_NOTIFICATION_2"
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -39,7 +43,7 @@ class MainActivity : AppCompatActivity() {
                 channelId = MyApplication.CHANNEL_ID_1,
                 title = getString(R.string.str_noti_title_channel_1),
                 message = getString(R.string.str_noti_message_channel_1),
-                styleType = "BigPicture"
+                notiType = TYPE_NOTIFICATION_1
             )
         }
 
@@ -48,14 +52,19 @@ class MainActivity : AppCompatActivity() {
                 channelId = MyApplication.CHANNEL_ID_2,
                 title = getString(R.string.str_noti_title_channel_2),
                 message = getString(R.string.str_noti_message_channel_2),
-                styleType = "BigText"
+                notiType = TYPE_NOTIFICATION_2
             )
         }
     }
 
-    private fun sendNotificationIfPermitted(channelId: String, title: String, message: String, styleType: String) {
+    private fun sendNotificationIfPermitted(
+        channelId: String,
+        title: String,
+        message: String,
+        notiType: String
+    ) {
         if (hasNotificationPermission()) {
-            sendNotification(channelId, title, message, styleType)
+            sendNotification(channelId, title, message, notiType)
         } else {
             requestNotificationPermission()
         }
@@ -83,14 +92,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendNotification(channelId: String, title: String, message: String, styleType: String) {
+    private fun sendNotification(
+        channelId: String,
+        title: String,
+        message: String,
+        notiType: String
+    ) {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             val notificationManagerCompat = NotificationManagerCompat.from(this)
-            val notification = buildNotification(channelId, title, message, styleType).build()
+            val notification = buildNotification(channelId, title, message, notiType).build()
             notificationManagerCompat.notify(getNotificationId(), notification)
         }
     }
@@ -99,9 +113,15 @@ class MainActivity : AppCompatActivity() {
         channelId: String,
         title: String,
         message: String,
-        styleType: String
+        notiType: String
     ): NotificationCompat.Builder {
         val bitmapIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        // Default sound
+        val defaultSound: Uri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        // Custom sound
+        val customSound: Uri =
+            Uri.parse("android.resource://${packageName}/${R.raw.sound_notification_custom}")
+
         val builder = NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
             .setContentText(message)
@@ -109,12 +129,17 @@ class MainActivity : AppCompatActivity() {
             .setLargeIcon(bitmapIcon)
             .setColor(resources.getColor(R.color.colorAccent, theme))
 
-        // Apply style based on styleType
-        if (styleType == "BigText") {
-            builder.setStyle(NotificationCompat.BigTextStyle().bigText(message))
-        } else if (styleType == "BigPicture") {
-            val bigPicture = BitmapFactory.decodeResource(resources, R.drawable.img_push_notification) // Replace with your image
-            builder.setStyle(NotificationCompat.BigPictureStyle().bigPicture(bigPicture))
+        // Apply style based on notiType
+        if (notiType == TYPE_NOTIFICATION_1) {
+            val bigPicture =
+                BitmapFactory.decodeResource(resources, R.drawable.img_push_notification)
+            builder
+                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bigPicture))
+                .setSound(customSound)
+        } else if (notiType == TYPE_NOTIFICATION_2) {
+            builder
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setSound(defaultSound)
         }
 
         return builder

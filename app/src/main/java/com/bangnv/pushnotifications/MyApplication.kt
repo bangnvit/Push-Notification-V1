@@ -3,6 +3,9 @@ package com.bangnv.pushnotifications
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 
@@ -27,6 +30,16 @@ class MyApplication : Application() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannels() {
+        // Default sound
+        val defaultSound: Uri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        // Custom sound
+        val customSound: Uri =
+            Uri.parse("android.resource://${packageName}/${R.raw.sound_notification_custom}")
+
+        val attributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .build()
+
         val channels = listOf(
             NotificationChannel(
                 CHANNEL_ID_1,
@@ -34,6 +47,7 @@ class MyApplication : Application() {
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = getString(R.string.channel_description_channel_1)
+                setSound(customSound, attributes)
             },
             NotificationChannel(
                 CHANNEL_ID_2,
@@ -41,6 +55,7 @@ class MyApplication : Application() {
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = getString(R.string.channel_description_channel_2)
+                setSound(defaultSound, attributes)
             }
         )
 
