@@ -2,6 +2,7 @@ package com.bangnv.pushnotifications
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
@@ -15,7 +16,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bangnv.pushnotifications.databinding.ActivityMainBinding
-import com.bangnv.pushnotifications.utils.showToastLong
 import com.bangnv.pushnotifications.utils.showToastShort
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 channelId = MyApplication.CHANNEL_ID_1,
                 title = getString(R.string.str_noti_title_channel_1),
                 message = getString(R.string.str_noti_message_channel_1),
-                notiType = TYPE_NOTIFICATION_1
+                notificationType = TYPE_NOTIFICATION_1
             )
         }
 
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                 channelId = MyApplication.CHANNEL_ID_2,
                 title = getString(R.string.str_noti_title_channel_2),
                 message = getString(R.string.str_noti_message_channel_2),
-                notiType = TYPE_NOTIFICATION_2
+                notificationType = TYPE_NOTIFICATION_2
             )
         }
 
@@ -69,10 +69,28 @@ class MainActivity : AppCompatActivity() {
         channelId: String,
         title: String,
         message: String,
-        notiType: String
+        notificationType: String
     ) {
         if (hasNotificationPermission()) {
-            sendNotification(channelId, title, message, notiType)
+            when (notificationType) {
+                TYPE_NOTIFICATION_1 -> sendNotification(
+                    buildType1Notification(
+                        channelId,
+                        title,
+                        message
+                    )
+                )
+
+                TYPE_NOTIFICATION_2 -> sendNotification(
+                    buildType2Notification(
+                        channelId,
+                        title,
+                        message
+                    )
+                )
+
+                else -> showToastShort("Unknown notification type")
+            }
         } else {
             requestNotificationPermission()
         }
@@ -85,7 +103,6 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         } else {
-            // If the version is lower than TIRAMISU, permission is not required
             true
         }
     }
@@ -100,61 +117,58 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendNotification(
-        channelId: String,
-        title: String,
-        message: String,
-        notiType: String
-    ) {
+    private fun sendNotification(notification: Notification) {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             val notificationManagerCompat = NotificationManagerCompat.from(this)
-            val notification = buildNotification(channelId, title, message, notiType).build()
             notificationManagerCompat.notify(getNotificationId(), notification)
         }
     }
 
-    private fun buildNotification(
+    private fun buildType1Notification(
         channelId: String,
         title: String,
-        message: String,
-        notiType: String
-    ): NotificationCompat.Builder {
+        message: String
+    ): Notification {
         val bitmapIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
-        // Default sound
-        val defaultSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        // Custom sound
-        val customSound: Uri =
+        val bigPicture = BitmapFactory.decodeResource(resources, R.drawable.img_push_notification)
+        val customSound =
             Uri.parse("android.resource://${packageName}/${R.raw.sound_notification_custom}")
 
-        val builder = NotificationCompat.Builder(this, channelId)
+        return NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
             .setContentText(message)
             .setSmallIcon(R.drawable.ic_notification)
             .setLargeIcon(bitmapIcon)
             .setColor(resources.getColor(R.color.colorAccent, theme))
+            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bigPicture))
+            .setSound(customSound)
+            .build()
+    }
 
-        // Apply style based on notiType
-        if (notiType == TYPE_NOTIFICATION_1) {
-            val bigPicture =
-                BitmapFactory.decodeResource(resources, R.drawable.img_push_notification)
-            builder
-                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bigPicture))
-                .setSound(customSound)
-        } else if (notiType == TYPE_NOTIFICATION_2) {
-            builder
-                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-                .setSound(defaultSound)
-        }
+    private fun buildType2Notification(
+        channelId: String,
+        title: String,
+        message: String
+    ): Notification {
+        val bitmapIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        val defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        return builder
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setLargeIcon(bitmapIcon)
+            .setColor(resources.getColor(R.color.colorAccent, theme))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setSound(defaultSound)
+            .build()
     }
 
     private fun getNotificationId() = Date().time.toInt()
-
 
     private fun sendCustomLayoutNotificationIfPermitted() {
         if (hasNotificationPermission()) {
@@ -165,44 +179,44 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendCustomLayoutNotification() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val notificationManagerCompat = NotificationManagerCompat.from(this)
-            val notification = buildCustomLayoutNotification().build()
-            notificationManagerCompat.notify(getNotificationId(), notification)
-            Log.d("Notification", "Custom layout notification sent successfully")
-        } else {
-            Log.e("Notification", "Notification permission not granted")
-        }
+        val notification = buildCustomLayoutNotification()
+        sendNotification(notification)
+        Log.d("Notification", "Custom layout notification sent successfully")
     }
 
     @SuppressLint("RemoteViewLayout", "SimpleDateFormat")
-    private fun buildCustomLayoutNotification(): NotificationCompat.Builder {
+    private fun buildCustomLayoutNotification(): Notification {
         val customSound: Uri =
             Uri.parse("android.resource://${packageName}/${R.raw.sound_notification_custom}")
-        val sdf: SimpleDateFormat = SimpleDateFormat("HH:mm")
-        val strDate: String = sdf.format(Date())
-        val bigPicture =
-            BitmapFactory.decodeResource(resources, R.drawable.img_push_notification)
+        val sdf = SimpleDateFormat("HH:mm")
+        val strDate = sdf.format(Date())
+        val bigPicture = BitmapFactory.decodeResource(resources, R.drawable.img_push_notification)
 
-        // Collapsed
-        val notificationLayout = RemoteViews(packageName, R.layout.layout_custom_notification)
-        notificationLayout.apply {
-            setTextViewText(R.id.tv_tìtle_custom_notification, getString(R.string.str_noti_title_custom_collapsed))
-            setTextViewText(R.id.tv_message_custom_notification, getString(R.string.str_noti_message_custom_collapsed))
-            setTextViewText(R.id.tv_time_custom_notification, strDate)
-        }
+        val notificationLayout =
+            RemoteViews(packageName, R.layout.layout_custom_notification).apply {
+                setTextViewText(
+                    R.id.tv_tìtle_custom_notification,
+                    getString(R.string.str_noti_title_custom_collapsed)
+                )
+                setTextViewText(
+                    R.id.tv_message_custom_notification,
+                    getString(R.string.str_noti_message_custom_collapsed)
+                )
+                setTextViewText(R.id.tv_time_custom_notification, strDate)
+            }
 
-        // Expanded
-        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.layout_custom_notification_expanded)
-        notificationLayoutExpanded.apply {
-            setTextViewText(R.id.tv_tìtle_custom_notification_expanded, getString(R.string.str_noti_title_custom_expanded))
-            setTextViewText(R.id.tv_message_custom_notification_expanded, getString(R.string.str_noti_message_custom_expanded))
-            setImageViewBitmap(R.id.img_custom_notification_expanded, bigPicture)
-        }
+        val notificationLayoutExpanded =
+            RemoteViews(packageName, R.layout.layout_custom_notification_expanded).apply {
+                setTextViewText(
+                    R.id.tv_tìtle_custom_notification_expanded,
+                    getString(R.string.str_noti_title_custom_expanded)
+                )
+                setTextViewText(
+                    R.id.tv_message_custom_notification_expanded,
+                    getString(R.string.str_noti_message_custom_expanded)
+                )
+                setImageViewBitmap(R.id.img_custom_notification_expanded, bigPicture)
+            }
 
         return NotificationCompat.Builder(this, MyApplication.CHANNEL_ID_2)
             .setSmallIcon(R.drawable.ic_notification)
@@ -210,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             .setCustomContentView(notificationLayout)
             .setCustomBigContentView(notificationLayoutExpanded)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-
+            .build()
     }
 
     override fun onRequestPermissionsResult(
@@ -221,7 +235,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_POST_NOTIFICATION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showToastLong(getString(R.string.str_permission_granted))
+                showToastShort(getString(R.string.str_permission_granted))
             } else {
                 showToastShort(getString(R.string.str_permission_denied))
             }

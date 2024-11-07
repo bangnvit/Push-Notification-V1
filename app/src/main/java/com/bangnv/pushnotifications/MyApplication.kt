@@ -31,7 +31,7 @@ class MyApplication : Application() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannels() {
         // Default sound
-        val defaultSound: Uri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val defaultSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         // Custom sound
         val customSound: Uri =
             Uri.parse("android.resource://${packageName}/${R.raw.sound_notification_custom}")
