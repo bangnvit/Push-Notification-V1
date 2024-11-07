@@ -19,6 +19,14 @@
         with different channels, sounds, and priority levels to ensure users
         are informed in a timely manner.</string>
 
+<!--    <string name="channel_name_channel_1">Channel 1</string>-->
+<!--    <string name="channel_description_custom">This is Channel 1</string>-->
+    <string name="str_send_notification_custom">Send Notification Custom Layout</string>
+    <string name="str_noti_title_custom_collapsed">Push Notification Title Custom Collapsed</string>
+    <string name="str_noti_message_custom_collapsed">Push Notification Message Custom Collapsed</string>
+    <string name="str_noti_title_custom_expanded">Push Notification Title Custom Expanded</string>
+    <string name="str_noti_message_custom_expanded">Push Notification Message Custom Expanded</string>
+
     <string name="str_permission_denied">Permission for notifications denied</string>
     <string name="str_permission_granted">Notification permission granted.
         Tap again to send the notification.</string>

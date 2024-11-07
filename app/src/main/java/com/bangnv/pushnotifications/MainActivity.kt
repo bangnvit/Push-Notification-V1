@@ -1,12 +1,15 @@
 package com.bangnv.pushnotifications
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.widget.RemoteViews
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -14,6 +17,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.bangnv.pushnotifications.databinding.ActivityMainBinding
 import com.bangnv.pushnotifications.utils.showToastLong
 import com.bangnv.pushnotifications.utils.showToastShort
+import java.text.SimpleDateFormat
 import java.util.Date
 
 class MainActivity : AppCompatActivity() {
@@ -54,6 +58,10 @@ class MainActivity : AppCompatActivity() {
                 message = getString(R.string.str_noti_message_channel_2),
                 notiType = TYPE_NOTIFICATION_2
             )
+        }
+
+        binding.btnSendNotificationCustom.setOnClickListener {
+            sendCustomLayoutNotificationIfPermitted()
         }
     }
 
@@ -117,7 +125,7 @@ class MainActivity : AppCompatActivity() {
     ): NotificationCompat.Builder {
         val bitmapIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
         // Default sound
-        val defaultSound: Uri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val defaultSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         // Custom sound
         val customSound: Uri =
             Uri.parse("android.resource://${packageName}/${R.raw.sound_notification_custom}")
@@ -145,8 +153,65 @@ class MainActivity : AppCompatActivity() {
         return builder
     }
 
-
     private fun getNotificationId() = Date().time.toInt()
+
+
+    private fun sendCustomLayoutNotificationIfPermitted() {
+        if (hasNotificationPermission()) {
+            sendCustomLayoutNotification()
+        } else {
+            requestNotificationPermission()
+        }
+    }
+
+    private fun sendCustomLayoutNotification() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val notificationManagerCompat = NotificationManagerCompat.from(this)
+            val notification = buildCustomLayoutNotification().build()
+            notificationManagerCompat.notify(getNotificationId(), notification)
+            Log.d("Notification", "Custom layout notification sent successfully")
+        } else {
+            Log.e("Notification", "Notification permission not granted")
+        }
+    }
+
+    @SuppressLint("RemoteViewLayout", "SimpleDateFormat")
+    private fun buildCustomLayoutNotification(): NotificationCompat.Builder {
+        val customSound: Uri =
+            Uri.parse("android.resource://${packageName}/${R.raw.sound_notification_custom}")
+        val sdf: SimpleDateFormat = SimpleDateFormat("HH:mm")
+        val strDate: String = sdf.format(Date())
+        val bigPicture =
+            BitmapFactory.decodeResource(resources, R.drawable.img_push_notification)
+
+        // Collapsed
+        val notificationLayout = RemoteViews(packageName, R.layout.layout_custom_notification)
+        notificationLayout.apply {
+            setTextViewText(R.id.tv_tìtle_custom_notification, getString(R.string.str_noti_title_custom_collapsed))
+            setTextViewText(R.id.tv_message_custom_notification, getString(R.string.str_noti_message_custom_collapsed))
+            setTextViewText(R.id.tv_time_custom_notification, strDate)
+        }
+
+        // Expanded
+        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.layout_custom_notification_expanded)
+        notificationLayoutExpanded.apply {
+            setTextViewText(R.id.tv_tìtle_custom_notification_expanded, getString(R.string.str_noti_title_custom_expanded))
+            setTextViewText(R.id.tv_message_custom_notification_expanded, getString(R.string.str_noti_message_custom_expanded))
+            setImageViewBitmap(R.id.img_custom_notification_expanded, bigPicture)
+        }
+
+        return NotificationCompat.Builder(this, MyApplication.CHANNEL_ID_2)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setSound(customSound)
+            .setCustomContentView(notificationLayout)
+            .setCustomBigContentView(notificationLayoutExpanded)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

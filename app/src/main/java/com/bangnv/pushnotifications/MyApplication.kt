@@ -52,7 +52,7 @@ class MyApplication : Application() {
             NotificationChannel(
                 CHANNEL_ID_2,
                 getString(R.string.channel_name_channel_2),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = getString(R.string.channel_description_channel_2)
                 setSound(defaultSound, attributes)
