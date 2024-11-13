@@ -11,11 +11,13 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bangnv.pushnotifications.databinding.ActivityMainBinding
+import com.bangnv.pushnotifications.utils.applyWindowInsets
 import com.bangnv.pushnotifications.utils.showToastShort
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -32,13 +34,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         initializeBinding()
+        applyWindowInsets()
         setupClickListener()
     }
 
     private fun initializeBinding() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+    }
+
+    private fun applyWindowInsets() {
+        binding.root.applyWindowInsets()
     }
 
     private fun setupClickListener() {
