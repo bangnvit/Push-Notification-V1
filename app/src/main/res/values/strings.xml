@@ -30,4 +30,15 @@
     <string name="str_permission_denied">Permission for notifications denied</string>
     <string name="str_permission_granted">Notification permission granted.
         Tap again to send the notification.</string>
+
+    <string name="str_request_noti_permission_title">Yêu cầu quyền thông báo</string>
+    <string name="str_request_noti_permission_message">Ứng dụng cần quyền thông báo để hoạt động đúng. Vui lòng cấp quyền.</string>
+    <string name="str_retry">Thử lại</string>
+    <string name="str_cancel">Hủy</string>
+    <string name="str_noti_permission_denied_title">Quyền thông báo bị từ chối</string>
+    <string name="str_noti_permission_denied_message">Bạn đã chọn từ chối quyền thông báo. Để tiếp tục sử dụng tính năng này, vui lòng cấp quyền trong Cài đặt.</string>
+    <string name="str_go_to_setting">Đi tới cài đặt</string>
+    <string name="str_schema_package">package</string>
+    <string name="str_hello_app">Hello Services App</string>
+    <string name="str_permission_granted_click_again">Permission granted, click again to send notification</string>
 </resources>

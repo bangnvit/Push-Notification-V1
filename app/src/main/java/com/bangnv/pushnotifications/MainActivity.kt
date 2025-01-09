@@ -3,6 +3,7 @@ package com.bangnv.pushnotifications
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
@@ -12,12 +13,14 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bangnv.pushnotifications.databinding.ActivityMainBinding
 import com.bangnv.pushnotifications.utils.applyWindowInsets
+import com.bangnv.pushnotifications.utils.showToastLong
 import com.bangnv.pushnotifications.utils.showToastShort
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -235,6 +238,8 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
 
+
+    // Handle notification permissions
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -242,11 +247,53 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_POST_NOTIFICATION) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showToastShort(getString(R.string.str_permission_granted))
-            } else {
-                showToastShort(getString(R.string.str_permission_denied))
+            when {
+                grantResults.isEmpty() -> {
+                    showPermissionExplanationDialog()
+                }
+                grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
+                    showToastShort(getString(R.string.str_permission_granted_click_again))
+                }
+                else -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val shouldShow = shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+                        if (shouldShow) {
+                            showPermissionExplanationDialog()
+                        } else {
+                            navigateToAppSettings()
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private fun showPermissionExplanationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.str_request_noti_permission_title))
+            .setMessage(getString(R.string.str_request_noti_permission_message))
+            .setPositiveButton(getString(R.string.str_retry)) { _, _ ->
+                requestNotificationPermission()
+            }
+            .setNegativeButton(getString(R.string.str_cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun navigateToAppSettings() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.str_noti_permission_denied_title))
+            .setMessage(getString(R.string.str_noti_permission_denied_message))
+            .setPositiveButton(getString(R.string.str_go_to_setting)) { _, _ ->
+                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts(getString(R.string.str_schema_package), packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
+            .setNegativeButton(getString(R.string.str_cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }
